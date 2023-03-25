@@ -3,12 +3,18 @@ import geopandas as gpd
 import leafmap.foliumap as lm
 import requests
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 map = lm.Map(max_zoom=7)
 
 api_key = "8a07d886a504428a8e1202226231003"
 base_url = "http://api.weatherapi.com/v1/current.json?key=" + api_key + "&q="
 forecast_url = "http://api.weatherapi.com/v1/future.json?key=" + api_key + "&q=&dt=2023-04-09"
+
+
+st.set_page_config(page_title="Wether App", page_icon=":cloud:", layout="wide")
+
 
 def get_current_temperature(city):
     url = base_url + city
@@ -24,7 +30,6 @@ def get_current_temperature(city):
     humidity = weather_data["current"]["humidity"]
     pressure_mb = weather_data["current"]["pressure_mb"]
 
-
     df = pd.DataFrame({
         "Country": [country],
         "Temperature (°C)": [temp],
@@ -35,6 +40,8 @@ def get_current_temperature(city):
         "Latitude": [lat],
         "Longitude": [lon],
     })
+
+
     gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.Longitude, df.Latitude))
     gdf = gdf.set_crs("EPSG:4326")
     map.add_gdf(gdf)
@@ -54,6 +61,7 @@ def addAttributesOptions(gfile):
             point = [lat[i],long[i],float(value[i])]
             data.append(point)
         map.add_heatmap(data)
+
         
 
 with st.sidebar:
@@ -64,7 +72,7 @@ with st.sidebar:
     st.sidebar.markdown("<p style='color: gray; font-size: 14px; text-align: center;'>You can use the application to search any city.</p>", unsafe_allow_html=True)
     st.sidebar.markdown("<p style='color: gray; font-size: 14px; text-align: center;'>When you hover over a city, a live info will pop up.</p>", unsafe_allow_html=True)
     st.sidebar.markdown("<p style='color: gray; font-size: 14px; text-align: center;'>You can import the `egypt_cities.geojson` file and choose the field to draw with.</p>", unsafe_allow_html=True)
-    st.markdown("<h1 style='color: aqua; text-align: center;'>AS MAP</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color: aqua; text-align: center;'>Weather MAP</h1>", unsafe_allow_html=True)
 
     baseList = st.selectbox("Choose your Basemap", ("Open Street Map", "Google HYBRID"))
     if baseList == "Open Street Map":
@@ -88,6 +96,8 @@ with st.sidebar:
             
         if not city or cities:
             map.set_center(31.,30.0444,zoom=6)
+
+
 
 map.to_streamlit(height=500)
 
